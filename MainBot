@@ -1,0 +1,140 @@
+import discord
+from discord.ext import commands
+import asyncio
+from bs4 import BeautifulSoup as soup
+from urllib.request import urlopen as uReq
+
+TOKEN = 'NTcwNjc0MTA2Njg1NTg3NDY2.XNdHiA.lTUy8tr0YJwdHJL2SlWmV9R0VRw'
+
+client = commands.Bot(command_prefix='.')
+client.remove_command('help')
+client.remove_command('play')
+
+crypto_uses = 0
+clear_uses = 0
+survey = crypto_uses, clear_uses
+@client.event
+async def on_ready():
+    await client.change_presence(activity=discord.Game(name='Trash Can'))
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('------')
+
+
+@client.command(pass_context=True)
+async def clear(ctx, amount=100):
+    try:
+        channel = ctx.message.channel
+        author = ctx.message.author
+        messages = []
+        if amount < 2:
+            await channel.send('You must delete atleast 2 messages')
+        async for message in channel.history(limit=int(amount)):
+            messages.append(message)
+        await channel.delete_messages(messages)
+        msg_sent = str(amount) + ' Messages Deleted ' + author.mention + '.'
+        await channel.send(msg_sent)
+        await asyncio.sleep(3)
+        lst_msg = []
+        async for two_message in channel.history(limit=1):
+            lst_msg.append(two_message)
+        await channel.delete_messages(lst_msg)
+        print('A member has used a command')
+    except:
+        author = ctx.message.author
+        channel = ctx.message.channel
+        await channel.send(author.mention +
+                           ' You can only delete 100 messages and under at a time that are less than 14 days old.')
+
+
+@client.command(pass_context=True)
+async def crypto(ctx):
+    channel_5 = client.get_channel(576472656409395243)
+    channel = ctx.message.channel
+    if ctx.message.channel != channel_5:
+        await channel.send('Please check the ' + channel_5.mention + ' channel for updated prices and volitility.')
+        lst_msg_2 = []
+        async for two_message_2 in channel_5.history(limit=99):
+            lst_msg_2.append(two_message_2)
+        await channel_5.delete_messages(lst_msg_2)
+        update = ('Bitcoin Price and Volitility: \n' + bc_price_text + bc_volatility_text +
+                  '\n' + 'Ethereum Price and Volitility: \n' + et_price_text + et_vol_text + '\n' +
+                  'Ripple Price and Volitility: ' + '\n' + xrp_price_text + xrp_volatility_text + '\n' +
+                  'Litecoin Price and Volitility: \n' + bc_price_text + bc_volatility_text +
+                  '\n')
+        await channel_5.send(update)
+    else:
+        update = ('Bitcoin Price and Volitility: \n' + bc_price_text + bc_volatility_text +
+                  '\n' + 'Ethereum Price and Volitility: \n' + et_price_text + et_vol_text + '\n' +
+                  'Ripple Price and Volitility: ' + '\n' + xrp_price_text + xrp_volatility_text + '\n' +
+                  'Litecoin Price and Volitility: \n' + bc_price_text + bc_volatility_text +
+                  '\n')
+        lst_msg_3 = []
+        async for two_message_3 in channel_5.history(limit=99):
+            lst_msg_3.append(two_message_3)
+        await channel_5.delete_messages(lst_msg_3)
+        await channel_5.send(update)
+
+
+site = 'https://cointelegraph.com/bitcoin-price-index'
+uClient = uReq(site)
+pg_html = uClient.read()
+uClient.close()
+page_souped = soup(pg_html, "html.parser")
+bc_price = page_souped.find("div", {
+    "class": "price-value"
+})
+bc_volatility = page_souped.find("div", {
+    "class": "day-percent"
+})
+bc_price_text = bc_price.get_text()
+bc_volatility_text = bc_volatility.get_text()
+
+site_3 = 'https://cointelegraph.com/xrp-price-index'
+uClient = uReq(site_3)
+pg_html = uClient.read()
+uClient.close()
+page_souped = soup(pg_html, "html.parser")
+bc_price = page_souped.find("div", {
+    "class": "price-value"
+})
+bc_volatility = page_souped.find("div", {
+    "class": "day-percent"
+})
+xrp_price_text = bc_price.get_text()
+xrp_volatility_text = bc_volatility.get_text()
+
+site_2 = 'https://cointelegraph.com/ethereum-price-index'
+uClient = uReq(site_2)
+pg_html = uClient.read()
+uClient.close()
+page_souped = soup(pg_html, "html.parser")
+et_price = page_souped.find("div", {
+    "class": "price-value"
+})
+et_vol = page_souped.find("div", {
+    "class": "day-percent"
+})
+et_vol_text = et_vol.get_text()
+et_price_text = et_price.get_text()
+
+site_4 = 'https://cointelegraph.com/ltc-price-index'
+uClient = uReq(site_4)
+pg_html = uClient.read()
+uClient.close()
+page_souped = soup(pg_html, "html.parser")
+bc_price = page_souped.find("div", {
+    "class": "price-value"
+})
+bc_volatility = page_souped.find("div", {
+    "class": "day-percent"
+})
+ltc_price_text = bc_price.get_text()
+ltc_volatility_text = bc_volatility.get_text()
+
+
+
+
+
+client.run(TOKEN)
